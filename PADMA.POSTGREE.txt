@@ -1,0 +1,548 @@
+server padma password: padma1 ip address: 192.168.199.129
+bhanvi server password:bhanvi12 ip address : 192.168.199.128
+postgresql-9.4 path:/opt/pgsql-9.4/bin/initdb /var/lib/pgsql-9.4/data
+/opt/pgsql-9.4/bin/pg-ctl /var/lib/pgsql-9.4/data start
+/opt/pgsql-9.4/bin/pg-ctl /var/lib/pgsql-9.4/data status
+/opt/pgsql-9.4/bin/pg-ctl /var/lib/pgsql-9.4/data stop
+
+
+
+/var/pgsql-10/bin/pg_ctl -D /usr/lib/pgsql-10/data start
+/var/pgsql-10/bin/pg_ctl -D /usr/lib/pgsql-10/data status
+/var/pgsql-10/bin/pg_ctl -D /usr/lib/pgsql-10/data stop
+
+/var/pgsql-10/bin/psql -p 5432 -U postgres -d postgres
+
+
+1) cd /usr/lib/pgsql-10/data
+2) vi postgresql.conf
+3) archive_made = on
+   archive_command = 'cp %p /usr/pgsql-10/archives/%f'
+   wal_level = replica
+4)mkdir -p /usr/pgsql-10/archives
+5)chown -R postgres:postgres /usr/pgsql-10/archives
+6)chmod 700 /usr/pgsql-10/archives
+7)/var/pgsql-10/bin/pg_ctl -D /usr/lib/pgsql-10/data start
+8) /var/pgsql-10/bin/psql -U postgres -p 5432 -d postgres
+9)connect to database
+10)create table tablename
+11)insert values inti table
+12)checkpoint
+13)select pg_switch_wal();
+14)create databasedatabase name with template='postgres'
+15)analyze
+16)vi /usr/pgsql-10/data/pg_hba.conf
+17)select pg_reload_conf();
+18)cd /usr/pgsql-10/archives
+19) /var/pgsql-10/bin/pg_basebackup -U postgres -p 5432 -h 192.168.199.128 -v -D /tmp/test1.sql -Ft -z -P
+
+
+
+
+
+
+
+
+
+
+
+NBCampus
+Black Rider Theme Powered by WordPress
+
+Who Am I Gadgets Review Career Tech Tech Interview Made Easy Blog
+Home » Blog » PostgreSQL » PostgreSQL DBA Interview Questions – 2020
+ PostgreSQL DBA Interview Questions – Year 2020
+
+Question -1: How to list all databases in PostgreSQL database cluster?
+
+Answer:
+
+select * from pg_database; will provide list of all databases in cluster.
+
+Question -2: How to find the database size?
+
+ Answer:
+
+  We can use pg_database_size(database name) function to find the database size.
+
+Question -3: How to create a new database in PostgreSQL?
+
+ Answer:
+
+  We can create new database with psql command “Create database databasename;”
+
+Question -4: How to start PostgreSQL cluster?
+
+ Answer:
+
+You can use pg_ctl start -D $PGDATA to start PostgreSQL cluster.
+
+Question -5: How to stop PostgreSQL Server ? what are different options/modes to stop PostgreSQL Cluster?
+
+Answer:
+
+ You can use pg_ctl stop -D $PGDATA -m s/f/i
+
+ where
+
+s  -> smart     : No new connection will be allowed but existing connection will be allowed to complete corresponding tasks and exit. It’s default mode.
+
+f  -> fast      : No new transaction will be allowed. PostgreSQL server will close and rollback current transactions, terminate all existing connection, perform checkpoint and then shutdown the cluster.
+
+ i  -> immediate : Shut down immediately without checkpoint. Crash recovery will be performed on next start.
+
+Question -6: How to stop a particular database in PostgreSQL cluster?
+
+Answer:
+
+ PostgreSQL doesn’t allow to stop/start a particular database in PostgreSQL cluster.  
+
+Question -7: What is PostgreSQL role? what are the default roles in PostgreSQL?
+
+ Answer:
+
+Role is a PostgreSQL cluster entity which is used to group database permissions together. In other words, a role is a group of privileges which can be granted to another role or database user.
+
+Question -8: What is PostgreSQL user?
+
+Answer:
+
+ User is a PostgreSQL cluster entity who can login to database, can own objects, can have set of privileges. In PostgreSQL cluster, role and user
+ keywords are used interchangeably. Only difference is that user can login to database while role don’t have login privilege.
+
+Question -9: How to convert a role to user in PostgreSQL?
+
+ Answer: We can grant login role to the target role to convert it to user.
+
+ We can use below mentioned command.
+
+ alter role <rolename > with login.
+
+Question -10: What is the difference between user and role in PostgreSQL?
+
+Answer:In PostgreSQL a user is a role with login privilege or a role is a user without login privilege.         
+
+Question -11: How to monitor the list of PostgreSQL users and roles?
+
+Answer: List of user can be extracted from pg_users view.
+
+           List of roles can be extracted from pg_roles view.
+
+Question -12: How to find the object level privilege of a user ?
+
+Answer:     We can get it from information_schema.role_table_grants
+
+Question -13: What is PostgreSQL schema?
+
+Answer: Schema is a logical entity of PostgreSQL which is used to group together database objects. You can create schema with “Create schema <schema name>”.
+
+Question -14: What are the backup utilities in PostgreSQL?
+
+Answer: PostgreSQL support logical and physical backup. You can use pg_dump or pg_dumpall for logical backup and You can use pg_basebackup.
+
+Question -15: What is the difference between pg_dump and pg_dumpall ?
+
+Answer: You can use pg_dump to backup a particular database, particular schema or table. pg_dumpall will backup all database in the cluster.
+
+Question -16: How do you restore backup taken by pg_dump utilitiy ?
+
+Answer:   pg_dump will create a sql file. You can import that file by using psql
+
+ex. psql -d dbname -h hostname -p portname -U username < pg_dump.sql
+
+Question -17: Have you worked on any 3rd party PostgreSQL database backup utility?
+
+Answer:There are numerous 3rd party tool for PostgreSQL physical ( full & incremental) backup. I am have used pgBackRest (https://pgbackrest.org/) .
+ It is very robust tool with features like full backup, incremental backup, ability to restore particular database backup, manage backup retention etc.
+
+Question -18: What is WAL or XLOG in PostgreSQL ?
+
+Answer:  Every change in data in database create a change vector in PostgreSQL memory i.e. WAL buffer. WAL writer process backup these change vectors on persistent storage (disk) files known as WAL or Xlog files. By default WAL or XLOG file size is 16MB.
+
+Question -19: what are important PostgreSQL background processes ?
+
+Answer:   Important background processes are –
+
+          Background Writer : Writes dirty buffers from shahred_buffers to persistent storage files i.e. database files.
+
+          Checkpointer: It updates latest checkpoint number in datafiles header and WAL logs. It marks a point in WAL logs, from where recover should start            in case of PostgreSQL crash.  
+
+                        Checkpoint woks up Background Writer processes which in turn start writing dirty buffers from shared_buffer to database files.          Frequency of Checkpoint is controlled by database cluster parameter checkpoint_timeout(default 5 mins) and max_wal_size, whichever comes earlier.
+
+          Autovacuum: This processes is responsible for routine maintenance i.e. routine vacuuming, clearing transaction ID’s , updating stats and updating          visibility map. DB    
+
+                      parameters autovacuum_freeze_max_age and vacuum_freeze_table_age decides the frequency.
+
+          WAL Writer: This process writes dirty buffers from wal_buffers to WAL files. It wokes up on every commit, every 200ms (wal_writer_delay)
+
+          Archiver : This process archives WAL files to archive location. It workes when archive_mode=on. Archive destination is defined by archive_command.
+
+          Statistics Collector : This processes is responsible for collecting and reporting PostgreSQL server activities. It’s behavior is controlled by track_activites, track_counts, track_functions and track_io_timings database parameters. You can turn on all of them or some of them depending upon your requirement.
+
+          logging collector: It is responsible for capturing log messages sent to stddr and stroing them to logfiles. This process is enabled/disabled with logging_collector database parameter.
+
+Question -20: What is WAL archiving ?
+
+ Answer:
+
+  If you configure database parameter archive_mode=on, then database archiver process will ensure to backup wal files to archive destination before wal writer process try to overwtite them. This configuration is critical for point in time recovery, standby database, and incremental hot backup.
+
+Question -21: What is min_wal_size and max_wal_size ?
+
+   Answer:
+
+Both min_wal_size and max_wal_size are defined in terms of disk space (MB, GB). min_wal_size controls the minium number of wal files that will be retained in WAL destination. As long as WAL destination utilization remains below this limit, WAL files are always recycled rather than deleted.
+
+   MAX_WAL_SIZE defines the max disk space limit which can be utilized by WAL files between automatic WAL checkpoints.
+
+Question -22: What is default WAL file size? Can we change it?
+
+Answer:
+
+          Default WAL size is 16 MB.
+
+          Upto PostgreSQL 10, WAL size can be changed at PostgreSQL binary compile time only. Starting with PostgreSQL 11, WAL size can be configured only at PostgreSQL cluster create time.
+
+          Upto PostgreSQL 10 :
+
+          ./configure –with-wal-segsize=64MB
+
+          Starting with PostgreSQL 11:
+
+           initdb –wal-segsize=32 $PGDATA
+
+Question -23: What are important memory components of PostgreSQL cluster?
+
+Answer:
+
+    Shared_buffers: This part of PostgreSQL instance is shared by all connections to read corresponding datafile blocks in memory. Any change to it will require PostgreSQL server restart.
+
+          wal_buffers: It is used to store change vectors. It’s default size is 1/16 of shared_buffers.
+
+          work_mem: It is per process memory structure. It is required by processes performing sorting.
+
+          temp_buffers: It is per session memory structure and used to read temporary tables block.
+
+          maintenance_work_mem: This memory structure is used by maintenance operations e.g. vacuuming, create index etc.
+
+Question -24: How you configure maximum number of connections allowed in PostgreSQL database?
+
+Answer:
+
+          You need to change max_connections database parameter and restart the database. Apart from that, you should consider if parallel operation is enabled in database and how much memory is available on server. It’s because every new server process may consume memory amount defined by work_mem.
+
+Question -25: What is indexing?
+
+Answer:
+
+          Index is a persistent table structure, having column data and corresponding row identifier. Index can be defined on single column of table or multiple columns of a table (known as composite index). Index can improve select query performance significantly if <5% of table data is fetch by query and indexed columns are part of where clause.
+
+Question -26: What are the pros and cons of having indexes?
+
+  Answer:
+
+  Index can improve performance of “Select” queries while it can impact performance of Insert, update and delete. It’s because every insert, update or delete on table will require extra overhead of index maintenance.
+
+Question -27: How to list the table size?
+
+Answer:
+
+    We can use pg_total_relation_size(TableID)
+
+Question -28: What is  a PostgreSQL constraint ? What type of constraints are supported in PostgreSQL ?
+
+Answer:
+
+   Constraints are database rules enforced on table data. PostgreSQL support not null, unique, primary key, foreign key, check and exclusion constraints.
+
+Question -29: What is the difference between primary key and unique constraint?
+
+Answer:
+
+  Unique constraint allows null value in table columns while Primary key doesn’t allow null.
+
+Question -30: What is a foreign key in PostgreSQL database?
+
+Answer:
+
+  Foreign key constrain ensure parent child relationship between 2 tables data. You can insert or update record in child table if corresponding record in parent table is available.
+
+Question -31: What is MVCC and how it’s implemented in PostgreSQL?
+
+Answer:
+
+  MVCC stands for multiversion concurrency control. It allows multiple sessions to access same records concurrently without affecting each other. Whenever a query starts, it creates a virtual snapshot of database and only data committed till that time become part of that snapshot. With this concept, multiple queries can see the same committed data but they can’t access each other uncommitted changes.
+
+Question -32: How to monitor and resolve high swapping on PostgreSQL database server?
+
+Answer:
+
+  We can monitor swapping with “free -h” and “iostat -x 1 10000”. High swapping is caused when work_mem is not big enough to sort the record set in 1 go and process has to save and recall subset of record set to and from disk.
+
+Question -33: What is logical and physical replication ? or What is the difference between logical and physical replication ?
+
+Answer:  Physical replication is block by block copy of primary database on standby database. It means objects and data on primary and standby is exactly same. While in case of logical replication, we can replicate a subset of objects from primary database to standby database and we can create extra objects on standby database.
+
+Question -34: How do you monitor physical replication progress ?
+
+Answer:
+
+ There are several ways to monitor physical replication health.
+
+   pg_controldata is very useful tool.
+
+   pg_stat_replication  is very useful view.
+
+   Apart from these, there are few useful functions also i.e. pg_is_in_recovery(),pg_last_xlog_receive_location(),pg_last_xlog_replay_location(),pg_last_xact_replay_timestamp(),
+
+Question -35: What is parallelism in PostgreSQL ? How to implement it ?
+
+ Answer:
+
+ Parallelism was introduced in PostgreSQL 9.6. Parallelism help to improve query performance by allocating multiple gather and worker processes per query. Number of parallel processes in database server are controlled by max_parallel_workers_per_gather,max_parallel_workers , max_worker_processes parameters and it’s behaviour is controlled by parallel_setup_cost database parameter.
+
+Question -36: what is CTID in PostgreSQL?
+
+Answer:
+
+  CTID pseudo column, create automatically in each table. It contain a value to uniquely identify each record in table.
+
+Question -37: what is table partitioning in PostgreSQL?
+
+Answer:
+
+ Table partitioning is PostgreSQL database feature, which help you to break your table in multiple physical partitions. It is specially useful from query performance point of view if your query access data from one or some partitions of table. In that case, query planner can easily locate the target partition and your query will need to fetch data from that partition only.
+
+ Table partitioning also gives you flexibility to add or remove individual partition of table using “Alter table tablename attach or detach partition partition_name”
+
+ Table partitions can have dedicated indexes which will further help to improve query performance.
+
+Question -38: what type of table partitioning is supported in PostgreSQL?
+
+Answer:
+
+ In PostgreSQL 11, range, hash and list partitioning is support.
+
+Question -39: How to monitor explain plan of a query? what are importing things to look for in explain plan ?
+
+ Answer:
+
+You can use “Explain” followed by query to check the explain plan of a query.
+
+ Important things to look for in query:
+
+ Query cost,
+
+ number of returned rows.
+
+ Number of rows filtered by filter in where clause
+
+ index scan or sequential scan
+
+Question -40: How to find the currently running queries in database?
+
+ Answer:
+
+You can find all currently running queries from pg_stat_activity. It will give useful information like client address, database, process id, query and current status.
+
+Question -41: What is wait event ? Please list down a few you are aware of.
+
+ Answer:
+
+If database process is waiting for a database resource then it is reported as wait event in pg_stat_activit view. WALWriteLock, buffer_mapping, wal_insert are few of common wait events in PostgreSQL.    
+
+Question -42: How to monitor wait events in PostgreSQL?
+
+ Answer:
+
+You can monitor queries and corresponding wait events from pg_stat_activity;
+
+Question -43: How to monitor PostgreSQL cluster resource utilization on Linux server?
+
+Answer:
+
+ Some useful commands are –
+
+ sar
+
+ iostat -x
+
+ vmstat
+
+ free -h
+
+ top
+
+ pg_top
+
+Question -44: What are object statistics?
+
+ Answer:
+
+Statistics are metadata about data in tables & indexes. Object statistics are automatically updated by auto vacuum process. Auto vacuum updates information about data distribution, visibility map and this information is utilized to generate efficient explain plan.
+
+Question -45: How to update table statistics?
+
+Answer:
+
+ Table/Index statistics are automatically updated by auto vacuum process. You can update statistics manually by using ANALYZE command.
+
+Question -46: what is visibility map?
+
+ Answer:
+
+Visibility map is associated with every table and index of PostgreSQL database. It stores information about those pages which only that information which is visible to all active transactions.Obviously these pages doen’t contain any dead tuples thus Auto Vacuum process with skip these pages while clearing dead tuples.
+
+Question -47: How to update visibility map?
+
+ Answer:
+
+Auto Vacuum process updates visibility map associated with a table / index.
+
+Question -48: What is tables/index bloating in PostgreSQL
+
+Answer:
+
+          In order to maintain MVCC, PostgreSQL database table keep current and past images or rows. Over the period of time, past images of rows can occupy significant space in table and that space can not be utilized for table growth. The space occupied by dead/past images of table data is called table bloating. Auto Vacuum process removes dead row images i.e. row images which will not be visible to any current or future transactions.
+
+Question -49: What is vacuuming in PostgreSQL?
+
+Answer:
+
+          Vacuuming is PostgreSQL database maintenance which is performed automatically by PostgreSQL database cluster as and when required. Vacuuming perform below mentioned tasks.
+
+          – Updates visibility map
+
+          – Release space occupied by dead tuples.
+
+          – Release transaction ID’s to avoid transaction wrap around.
+
+          – Update table/index statistics.
+
+Question -50: what is the difference between vacuum and vacuum full ?
+
+Answer:
+
+ There are mainly 2 difference.
+
+ – Vacuum full will release freed space to operating system while vacuum process will keep the freed space with object i.e. Vacuum full will reduce the object size while normal vacuum process will not reduce object size.
+
+ – Vacuum full will lock table in exclusive mode while normal vacuum with lock table in shared mode.
+
+Question -51: Your table have index on a column. A user’s query which is having that column in where clause is not using that column. What could be the reason?
+
+ Answer:
+
+There may be numerous reasons behind that.
+
+  – Query is fetching more than 5% of table data.
+
+  – Index and table stats are not updated.
+
+  – Index is in invalidate state.
+
+Question -52: How to increase probability of index usage in PostgreSQL ?
+
+  Answer:
+
+Below mentioned are certain measures which we can take to increase
+
+ – use indexed columns in where clause of query.
+
+ – Adjust query to fetch less than 5% of table data.
+
+ – reduce random_page_cost comparatively to seq_page_cost
+
+ – adjust cpu_index_tuple_cost
+
+ – update tables and index statistics frequently.
+
+Question -53: How to monitor when table or index stats were updated ?
+
+ Answer:
+
+We can do it from pg_stat_all_tables
+
+Question -54: What are some important new features of PostgreSQL 11.
+
+Answer:
+
+– Enhanced partitioning
+
+                     – Default partition in partitioned table.
+
+                     – Hash partitioning is new fature in PostgreSQL 11.
+
+                     – Create index on partitioned table.
+
+          – Adding new column with default value
+
+          – Custom WAL size can be defained at cluster initialization.
+
+          – Create index in parallel i.e. use parallel processes.
+
+Question -55: What are the few important PostgreSQL views?
+
+Answer:
+
+ – Some of the important PostgreSQL views are as below.
+
+  pg_user
+
+  pg_roles
+
+  pg_classes
+
+  pg_stat_activity
+
+  pg_stat_statements
+
+  pg_database
+
+  pg_tables
+
+  pg_indexes
+
+ Go To – PostgreSQL Blog
+
+Leave a comment
+Leave a Reply
+Your email address will not be published. Required fields are marked *
+
+Comment
+
+Name *
+
+Email *
+
+Website
+
+ Save my name, email, and website in this browser for the next time I comment.
+
+Mathematics :
+Maths ShortCut Tricks
+SSC Maths
+NCERT Class 10
+NCERT Class 9
+NCERT Class 8
+NCERT Class 7
+NCERT Class 6
+NCERT Class 5
+NCERT Class 4
+NCERT Class 3
+NCERT Class 2
+NCERT Class 1
+Search:
+Search
+Subscribe NBCampus
+First name or full name
+Email
+ By continuing, you accept the privacy policy
+Archives
+March 2020 (3)
+February 2020 (2)
+Recent Posts
+Number Series With Common Difference 11th March 2020
+PostgreSQL – Add primary key using existing unique index 2nd March 2020
+NBCampus - For the Love of Maths and Technology
+Saanchi Singh Powered by N Baliyan
